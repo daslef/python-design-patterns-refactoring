@@ -1,18 +1,3 @@
-"""
-features agregados: 
-+ PaymentResponse: objeto
-+ RefundPaymentProtocol: interfaz
-+ PaymentProcessorProtocol:interfaz
-+ RecurringPaymentProtocol: interfaz
-+ StripePaymentProcessor: subclase (ejecuta demasiadas cosas)
-+ OfflinePaymentProcessor: subclase
--------------------------------------------------------------
-PREGUNTA: ¿Qué principio SOLID se estaba siguiendo en los métodos de recurrencia?
-El principio S: single responsibity principle porque está dedicado úni-
-camente a configurar los pagos con stripe y de la suscripción 
-están delegadas a métodos auxiliares
-"""
-
 import os
 from dataclasses import dataclass, field
 from typing import Optional, Protocol
@@ -48,10 +33,10 @@ class PaymentResponse(BaseModel):
     message: Optional[str] = None
 
 
-class PaymentProcessor(Protocol): 
+class PaymentProcessor(Protocol):
     """
     Protocol for processing payments, refunds, and recurring payments.
-    # HEREDA A TODOS LOS PAYMENTPROCESOR
+
     This protocol defines the interface for payment processors. Implementations
     should provide methods for processing payments, refunds, and setting up recurring payments.
     """
@@ -59,9 +44,9 @@ class PaymentProcessor(Protocol):
     def process_transaction(
         self, customer_data: CustomerData, payment_data: PaymentData
     ) -> PaymentResponse: ...
-    
+
     def refund_payment(self, transaction_id:str) -> PaymentResponse: ...
-    
+
     def setup_recurring_payment(
         self, customer_data: CustomerData, payment_data: PaymentData
     ) ->PaymentResponse: ...
@@ -216,18 +201,18 @@ class OfflinePaymentProcessor(PaymentProcessor):
         )
     """
     los siguientes métodos levantan errores porque no se pueden hacer reembolsos ni recurrencias a efectivo
-    se incumple el principio de segregación de interfaces porque una clase no debería depender 
+    se incumple el principio de segregación de interfaces porque una clase no debería depender
     de clases que no puede implementar
     """
     def refund_payment(self, transaction_id: str) -> PaymentResponse:
         print("refunds aren't supported in OfflinePaymentOricessor.")
         raise NotImplementedError("Refunds not supported in offline processor.")
-    
+
     def setup_recurring_payment(self, customer_data: CustomerData, payment_data: PaymentData
     ) ->PaymentResponse:
         print("recurring payments aren't supported in OfflinePaymentOricessor.")
         raise NotImplementedError("Refunds not supported in offline processor.")
-    
+
 
 class Notifier(Protocol):
     """
